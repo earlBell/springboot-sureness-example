@@ -1,0 +1,30 @@
+server:
+  port: 8081
+
+jasypt:
+  encryptor:
+    password: e!swhdg&d763jo
+
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true&useSSL=false
+    platform: mysql
+    schema: classpath:db/schema.sql
+    data: classpath:db/data.sql
+    # 每次重启都会根据data.sql schema.sql重建表数据, 设置 NEVER 就不启动重建
+    # Each restart will rebuild the table data according to data.sql schema.sql
+    # setting NEVER will not start the reconstruction
+    initialization-mode: always
+    type: com.zaxxer.hikari.HikariDataSource
+  hikari:
+    minimum-idle: 5
+    maximum-pool-size: 500
+    idle-timeout: 600000
+  jpa:
+    database: mysql
+    show-sql: true
+
