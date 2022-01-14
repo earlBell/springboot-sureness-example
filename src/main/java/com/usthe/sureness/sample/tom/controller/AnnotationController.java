@@ -20,7 +20,6 @@ public class AnnotationController {
      */
 
     @GetMapping("/api/annotation/source1")
-    @RequiresRoles(roles = {"role1", "role2","role_guest"}, mapping = "/api/annotation/source1", method = "get")
     public ResponseEntity<String> api1Mock1() {
         return ResponseEntity.ok("success");
     }

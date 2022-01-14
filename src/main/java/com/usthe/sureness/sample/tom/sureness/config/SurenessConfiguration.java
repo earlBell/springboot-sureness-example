@@ -9,13 +9,13 @@ import com.usthe.sureness.processor.Processor;
 import com.usthe.sureness.processor.ProcessorManager;
 import com.usthe.sureness.processor.support.NoneProcessor;
 import com.usthe.sureness.provider.annotation.AnnotationPathTreeProvider;
+import com.usthe.sureness.provider.ducument.DocumentPathTreeProvider;
 import com.usthe.sureness.sample.tom.sureness.processor.CustomTokenProcessor;
 import com.usthe.sureness.sample.tom.sureness.provider.RedisAccountProvider;
 import com.usthe.sureness.sample.tom.sureness.subject.CustomTokenSubjectCreator;
 import com.usthe.sureness.subject.SubjectFactory;
 import com.usthe.sureness.subject.SurenessSubjectFactory;
 import com.usthe.sureness.subject.creater.NoneSubjectServletCreator;
-import com.usthe.sureness.util.JsonWebTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,10 +57,12 @@ public class SurenessConfiguration {
     }
 
     /**
-     * @param databasePathTreeProvider the path tree resource load from database
+     * 鉴权资源来源配置
      */
     @Bean
-    TreePathRoleMatcher pathRoleMatcher(PathTreeProvider databasePathTreeProvider) {
+    TreePathRoleMatcher pathRoleMatcher( ) {
+        // the path tree resource load from document - sureness.yml
+        PathTreeProvider documentPathTreeProvider = new DocumentPathTreeProvider();
         // the path tree resource load form annotation - @RequiresRoles @WithoutAuth
         AnnotationPathTreeProvider annotationPathTreeProvider = new AnnotationPathTreeProvider();
         annotationPathTreeProvider.setScanPackages(Collections.singletonList("com.usthe.sureness.sample.tom.controller"));
@@ -68,8 +70,8 @@ public class SurenessConfiguration {
         DefaultPathRoleMatcher pathRoleMatcher = new DefaultPathRoleMatcher();
         //鉴权优先级
         pathRoleMatcher.setPathTreeProviderList(Arrays.asList(
-                annotationPathTreeProvider,
-                databasePathTreeProvider));
+                documentPathTreeProvider,
+                annotationPathTreeProvider ));
         pathRoleMatcher.buildTree();
         return pathRoleMatcher;
     }

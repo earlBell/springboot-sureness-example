@@ -2,6 +2,7 @@ package com.usthe.sureness.sample.tom.controller;
 
 import cn.hutool.core.util.IdUtil;
 import com.usthe.sureness.provider.SurenessAccount;
+import com.usthe.sureness.provider.annotation.WithoutAuth;
 import com.usthe.sureness.sample.tom.pojo.cache.SurenessAccountCO;
 import com.usthe.sureness.sample.tom.pojo.dto.Account;
 import com.usthe.sureness.sample.tom.pojo.dto.Message;
@@ -54,7 +55,7 @@ public class AccountController {
         //存放至Redis
         SurenessAccountCO cacheUser =  accountService.loadLoginSuccUser(account.getUsername());
         //设置token有效时间内，每次固定时间刷新token
-        cacheUser.setExpiredTime(LocalDateTime.now().plusMinutes(1));
+        cacheUser.setExpiredTime(LocalDateTime.now().plusMinutes(30));
         String token =  IdUtil.fastUUID();
         redisTemplate.opsForValue().set(token ,cacheUser,100, TimeUnit.MINUTES );
 
