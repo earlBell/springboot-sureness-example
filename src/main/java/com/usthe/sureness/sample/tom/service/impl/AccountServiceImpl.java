@@ -1,9 +1,11 @@
 package com.usthe.sureness.sample.tom.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.usthe.sureness.provider.DefaultAccount;
 import com.usthe.sureness.provider.SurenessAccount;
 import com.usthe.sureness.sample.tom.dao.AuthUserDao;
 import com.usthe.sureness.sample.tom.dao.AuthUserRoleBindDao;
+import com.usthe.sureness.sample.tom.pojo.cache.SurenessAccountCO;
 import com.usthe.sureness.sample.tom.pojo.dto.Account;
 import com.usthe.sureness.sample.tom.pojo.entity.AuthUserDO;
 import com.usthe.sureness.sample.tom.pojo.entity.AuthUserRoleBindDO;
@@ -31,11 +33,15 @@ public class AccountServiceImpl implements AccountService {
 
     private AuthUserRoleBindDao userRoleBindDao;
 
-
     @Override
-    public AuthUserDO findByName(String username) {
-        Optional<AuthUserDO> optional = authUserDao.findAuthUserByUsername(username);
-        return optional.orElseThrow(() -> new NullPointerException("数据不存在"));
+    public SurenessAccountCO loadLoginSuccUser(String username) {
+        Optional<AuthUserDO> authUserOptional = authUserDao.findAuthUserByUsername(username);
+        AuthUserDO authUser  = authUserOptional.orElseThrow(() -> new RuntimeException("数据不存在"));
+        SurenessAccountCO cacheUser = new SurenessAccountCO();
+        BeanUtil.copyProperties(authUser,cacheUser);
+        //设置角色
+        cacheUser.setRoles( loadAccountRoles(username) );
+        return cacheUser;
     }
 
     @Override
@@ -81,6 +87,8 @@ public class AccountServiceImpl implements AccountService {
         Optional<AuthUserDO> authUserOptional = authUserDao.findAuthUserByUsername(account.getUsername());
         return authUserOptional.isPresent();
     }
+
+
 
     @Override
     public SurenessAccount loadAccount(String username) {

@@ -1,10 +1,14 @@
 package com.usthe.sureness.sample.tom.service;
 
 import com.usthe.sureness.provider.SurenessAccount;
+import com.usthe.sureness.sample.tom.pojo.cache.SurenessAccountCO;
 import com.usthe.sureness.sample.tom.pojo.dto.Account;
 import com.usthe.sureness.sample.tom.pojo.entity.AuthUserDO;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author tomsun28
@@ -13,11 +17,12 @@ import java.util.List;
 public interface AccountService {
 
     /**
-     * 根据用户名获取账号信息
-     * @param username 用户名
-     * @return AuthUserDO- 用户信息
+     * 获取登录成功的用户信息
+     * @param username 已登录成功的用户名称
+     * @return
      */
-    AuthUserDO findByName(String username) ;
+    SurenessAccountCO loadLoginSuccUser(String username);
+
 
     /**
      * Verify account validity, username and password

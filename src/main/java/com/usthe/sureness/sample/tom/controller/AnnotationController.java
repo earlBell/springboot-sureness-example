@@ -18,6 +18,7 @@ public class AnnotationController {
      * 优先注解读取（不论角色是否和菜单绑定）
      * roles：必需为role角色表的代码
      */
+
     @GetMapping("/api/annotation/source1")
     @RequiresRoles(roles = {"role1", "role2","role_guest"}, mapping = "/api/annotation/source1", method = "get")
     public ResponseEntity<String> api1Mock1() {

@@ -1,6 +1,5 @@
 package com.usthe.sureness.sample.tom.controller;
 
-import com.usthe.sureness.provider.annotation.RequiresRoles;
 import com.usthe.sureness.sample.tom.pojo.dto.Message;
 import com.usthe.sureness.sample.tom.pojo.entity.AuthResourceDO;
 import com.usthe.sureness.sample.tom.pojo.entity.AuthRoleDO;

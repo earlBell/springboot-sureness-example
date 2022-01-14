@@ -3,6 +3,7 @@ package com.usthe.sureness.sample.tom.sureness.processor;
 import com.usthe.sureness.processor.exception.SurenessAuthenticationException;
 
 /**
+ * 刷新token使用
  * refresh token message
  * @author tomsun28
  * @date 2020-12-03 23:29

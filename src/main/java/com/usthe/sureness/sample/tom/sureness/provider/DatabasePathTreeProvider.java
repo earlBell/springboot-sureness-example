@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * 配置菜单资源来源-启动加载
+ * 配置菜单资源来源
  * ths provider provides path resources
  * load sureness config resource form database
  * @author tomsun28

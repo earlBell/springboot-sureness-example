@@ -5,13 +5,22 @@ jasypt:
   encryptor:
     password: e!swhdg&d763jo
 
-
 spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    timeout: 10000
+    lettuce:
+      pool:
+        max-active: 20
+        min-idle: 5
+        max-wait: 5000ms
+        max-idle: 20
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
-    url: jdbc:mysql://localhost:3306/sureness?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://127.0.0.1:3306/sureness?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true&useSSL=false&serverTimezone=UTC
     platform: mysql
     schema: classpath:db/schema.sql
     data: classpath:db/data.sql

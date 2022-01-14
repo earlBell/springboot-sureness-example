@@ -1,15 +1,15 @@
 package com.usthe.sureness.sample.tom.controller;
 
-import cn.hutool.core.bean.BeanUtil;
-import com.alibaba.fastjson.JSONObject;
+import cn.hutool.core.util.IdUtil;
+import com.usthe.sureness.provider.SurenessAccount;
+import com.usthe.sureness.sample.tom.pojo.cache.SurenessAccountCO;
 import com.usthe.sureness.sample.tom.pojo.dto.Account;
 import com.usthe.sureness.sample.tom.pojo.dto.Message;
-import com.usthe.sureness.sample.tom.pojo.entity.AuthUserDO;
-import com.usthe.sureness.sample.tom.pojo.resp.AccountResp;
 import com.usthe.sureness.sample.tom.service.AccountService;
 import com.usthe.sureness.util.JsonWebTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author tomsun28
@@ -34,12 +36,12 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
-    /**
-     * 登录
-     */
-    @PostMapping("/token")
-    public ResponseEntity<Message> issueJwtToken(@RequestBody @Validated Account account) {
+
+    @PostMapping("/custom/token")
+    public ResponseEntity<Message> issueCustomToken(@RequestBody @Validated Account account) {
         boolean authenticatedFlag = accountService.authenticateAccount(account);
         if (!authenticatedFlag) {
             Message message = Message.builder()
@@ -49,22 +51,20 @@ public class AccountController {
             }
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
         }
-        //用户角色列表
-        List<String> ownRole = accountService.loadAccountRoles(account.getUsername());
-        AuthUserDO accountUser  =  accountService.findByName(account.getUsername());
-        AccountResp jwtAccount  = new AccountResp();
-        BeanUtil.copyProperties(accountUser,jwtAccount);
-        //存放JWT，POSTMEN请求时通过bearer token设置token
-        String jwt = JsonWebTokenUtil.issueJwt(UUID.randomUUID().toString(), JSONObject.toJSONString(jwtAccount) ,
-                "tom-auth-server", 3600L, ownRole);
-        Map<String, String> responseData = Collections.singletonMap("token", jwt);
+        //存放至Redis
+        SurenessAccountCO cacheUser =  accountService.loadLoginSuccUser(account.getUsername());
+        //设置token有效时间内，每次固定时间刷新token
+        cacheUser.setExpiredTime(LocalDateTime.now().plusMinutes(1));
+        String token =  IdUtil.fastUUID();
+        redisTemplate.opsForValue().set(token ,cacheUser,100, TimeUnit.MINUTES );
+
+        Map<String, String> responseData = Collections.singletonMap("customToken", token);
         Message message = Message.builder().data(responseData).build();
         if (log.isDebugEnabled()) {
-            log.debug("issue token success, account: {} -- token: {}", account, jwt);
+            log.debug("issue token success, account: {} -- token: {}", account, token);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
-
 
     /**
      * 注册

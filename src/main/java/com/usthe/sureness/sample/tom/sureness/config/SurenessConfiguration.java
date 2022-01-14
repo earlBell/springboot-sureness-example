@@ -7,18 +7,16 @@ import com.usthe.sureness.mgt.SurenessSecurityManager;
 import com.usthe.sureness.processor.DefaultProcessorManager;
 import com.usthe.sureness.processor.Processor;
 import com.usthe.sureness.processor.ProcessorManager;
-import com.usthe.sureness.processor.support.JwtProcessor;
 import com.usthe.sureness.processor.support.NoneProcessor;
-import com.usthe.sureness.processor.support.PasswordProcessor;
-import com.usthe.sureness.provider.SurenessAccountProvider;
 import com.usthe.sureness.provider.annotation.AnnotationPathTreeProvider;
-import com.usthe.sureness.provider.ducument.DocumentPathTreeProvider;
+import com.usthe.sureness.sample.tom.sureness.processor.CustomTokenProcessor;
+import com.usthe.sureness.sample.tom.sureness.provider.RedisAccountProvider;
+import com.usthe.sureness.sample.tom.sureness.subject.CustomTokenSubjectCreator;
 import com.usthe.sureness.subject.SubjectFactory;
 import com.usthe.sureness.subject.SurenessSubjectFactory;
-import com.usthe.sureness.subject.creater.BasicSubjectServletCreator;
-import com.usthe.sureness.subject.creater.JwtSubjectServletCreator;
 import com.usthe.sureness.subject.creater.NoneSubjectServletCreator;
 import com.usthe.sureness.util.JsonWebTokenUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,22 +33,26 @@ import java.util.List;
 @Configuration
 public class SurenessConfiguration {
 
-    /**
-     * jwt secret key
-     */
-    private static final String TOM_SECRET_KEY = "?::4s9ssf2sf4sed45pf):" +
-            "RnLN7XNn4wARoQXizIv6MHUsIV+EFfiMw/x7R0ntu4aWr/CWuApcFaj" +
-            "CyaFv0bwq2Eik0jdrKUtsA6bx3sDJeFV643R+YYzGMRIqcBIp6AKA98" +
-            "GM2RIqcBIp6-?::4390fsf4sdl6opf)4ZI:tdQMtcQQ14pkOAQdQ546";
+
+    @Autowired
+    private CustomTokenSubjectCreator customTokenSubjectCreator;
 
     @Bean
-    ProcessorManager processorManager(SurenessAccountProvider accountProvider) {
+    CustomTokenProcessor customTokenProcessor(RedisAccountProvider redisAccountProvider){
+        CustomTokenProcessor customTokenProcessor = new CustomTokenProcessor();
+        customTokenProcessor.setRedisAccountProvider(redisAccountProvider);
+        return customTokenProcessor;
+    }
+
+    @Bean
+    ProcessorManager processorManager(CustomTokenProcessor customTokenProcessor) {
         // process init
         List<Processor> processorList = new LinkedList<>();
-        // use default jwt processor
-        JwtProcessor jwtProcessor = new JwtProcessor();
-        processorList.add(jwtProcessor);
-
+        // use default none processor
+        NoneProcessor noneProcessor = new NoneProcessor();
+        processorList.add(noneProcessor);
+        // use custom token processor
+        processorList.add(customTokenProcessor);
         return new DefaultProcessorManager(processorList);
     }
 
@@ -64,6 +66,7 @@ public class SurenessConfiguration {
         annotationPathTreeProvider.setScanPackages(Collections.singletonList("com.usthe.sureness.sample.tom.controller"));
         // pathRoleMatcher init
         DefaultPathRoleMatcher pathRoleMatcher = new DefaultPathRoleMatcher();
+        //鉴权优先级
         pathRoleMatcher.setPathTreeProviderList(Arrays.asList(
                 annotationPathTreeProvider,
                 databasePathTreeProvider));
@@ -78,15 +81,14 @@ public class SurenessConfiguration {
         subjectFactory.registerSubjectCreator(Arrays.asList(
                 // attention! must add noSubjectCreator first
                 new NoneSubjectServletCreator(),
-                // use default jwt subject creator
-                new JwtSubjectServletCreator()));
+                // use custom token creator
+                customTokenSubjectCreator));
         return subjectFactory;
     }
 
     @Bean
     SurenessSecurityManager securityManager(ProcessorManager processorManager,
                                             TreePathRoleMatcher pathRoleMatcher, SubjectFactory subjectFactory) {
-        JsonWebTokenUtil.setDefaultSecretKey(TOM_SECRET_KEY);
         // surenessSecurityManager init
         SurenessSecurityManager securityManager = SurenessSecurityManager.getInstance();
         securityManager.setPathRoleMatcher(pathRoleMatcher);
