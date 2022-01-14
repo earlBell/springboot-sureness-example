@@ -1,4 +1,4 @@
-use test;
+use sureness;
 
 -- ----------------------------
 -- Table structure for auth_resource

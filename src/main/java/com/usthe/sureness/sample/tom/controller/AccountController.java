@@ -1,7 +1,11 @@
 package com.usthe.sureness.sample.tom.controller;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.usthe.sureness.sample.tom.pojo.dto.Account;
 import com.usthe.sureness.sample.tom.pojo.dto.Message;
+import com.usthe.sureness.sample.tom.pojo.entity.AuthUserDO;
+import com.usthe.sureness.sample.tom.pojo.resp.AccountResp;
 import com.usthe.sureness.sample.tom.service.AccountService;
 import com.usthe.sureness.util.JsonWebTokenUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +35,6 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    private static final String TOKEN_SPLIT = "--";
-
     /**
      * 登录
      */
@@ -49,8 +51,11 @@ public class AccountController {
         }
         //用户角色列表
         List<String> ownRole = accountService.loadAccountRoles(account.getUsername());
-        //存放JWT
-        String jwt = JsonWebTokenUtil.issueJwt(UUID.randomUUID().toString(), account.getUsername(),
+        AuthUserDO accountUser  =  accountService.findByName(account.getUsername());
+        AccountResp jwtAccount  = new AccountResp();
+        BeanUtil.copyProperties(accountUser,jwtAccount);
+        //存放JWT，POSTMEN请求时通过bearer token设置token
+        String jwt = JsonWebTokenUtil.issueJwt(UUID.randomUUID().toString(), JSONObject.toJSONString(jwtAccount) ,
                 "tom-auth-server", 3600L, ownRole);
         Map<String, String> responseData = Collections.singletonMap("token", jwt);
         Message message = Message.builder().data(responseData).build();
@@ -60,29 +65,6 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
-    @PostMapping("/custom/token")
-    public ResponseEntity<Message> issueCustomToken(@RequestBody @Validated Account account) {
-        boolean authenticatedFlag = accountService.authenticateAccount(account);
-        if (!authenticatedFlag) {
-            Message message = Message.builder()
-                    .errorMsg("username or password not incorrect").build();
-            if (log.isDebugEnabled()) {
-                log.debug("account: {} authenticated fail", account);
-            }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(message);
-        }
-        long refreshPeriodTime = 36000L;
-        String token = account.getUsername() + TOKEN_SPLIT + System.currentTimeMillis()
-                + TOKEN_SPLIT + refreshPeriodTime
-                + TOKEN_SPLIT + UUID.randomUUID().toString().replace("-", "");
-        TokenStorage.addToken(account.getUsername(), token);
-        Map<String, String> responseData = Collections.singletonMap("customToken", token);
-        Message message = Message.builder().data(responseData).build();
-        if (log.isDebugEnabled()) {
-            log.debug("issue token success, account: {} -- token: {}", account, token);
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(message);
-    }
 
     /**
      * 注册

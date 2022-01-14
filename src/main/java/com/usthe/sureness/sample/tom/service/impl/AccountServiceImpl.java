@@ -31,6 +31,13 @@ public class AccountServiceImpl implements AccountService {
 
     private AuthUserRoleBindDao userRoleBindDao;
 
+
+    @Override
+    public AuthUserDO findByName(String username) {
+        Optional<AuthUserDO> optional = authUserDao.findAuthUserByUsername(username);
+        return optional.orElseThrow(() -> new NullPointerException("数据不存在"));
+    }
+
     @Override
     public boolean authenticateAccount(Account account) {
         //获取用户

@@ -1,4 +1,4 @@
-use test ;
+use sureness ;
 -- ----------------------------
 -- Records of auth_resource
 -- ----------------------------

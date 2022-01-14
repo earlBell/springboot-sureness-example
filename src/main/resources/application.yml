@@ -11,14 +11,14 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
-    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/sureness?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true&useSSL=false&serverTimezone=UTC
     platform: mysql
     schema: classpath:db/schema.sql
     data: classpath:db/data.sql
     # 每次重启都会根据data.sql schema.sql重建表数据, 设置 NEVER 就不启动重建
     # Each restart will rebuild the table data according to data.sql schema.sql
     # setting NEVER will not start the reconstruction
-    initialization-mode: always
+    initialization-mode: NEVER
     type: com.zaxxer.hikari.HikariDataSource
   hikari:
     minimum-idle: 5

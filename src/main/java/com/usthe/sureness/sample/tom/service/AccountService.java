@@ -2,6 +2,7 @@ package com.usthe.sureness.sample.tom.service;
 
 import com.usthe.sureness.provider.SurenessAccount;
 import com.usthe.sureness.sample.tom.pojo.dto.Account;
+import com.usthe.sureness.sample.tom.pojo.entity.AuthUserDO;
 
 import java.util.List;
 
@@ -10,6 +11,14 @@ import java.util.List;
  * @date 00:12 2019-08-01
  */
 public interface AccountService {
+
+    /**
+     * 根据用户名获取账号信息
+     * @param username 用户名
+     * @return AuthUserDO- 用户信息
+     */
+    AuthUserDO findByName(String username) ;
+
     /**
      * Verify account validity, username and password
      * @param account account info
