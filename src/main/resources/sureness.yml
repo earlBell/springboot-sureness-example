@@ -1,0 +1,20 @@
+## -- sureness.yml document dataSource-- ##
+
+# load api resource which need be protected, config role who can access these resource.
+# resources that are not configured are also authenticated and protected by default, but not authorized
+# eg: /api/v2/host===post===[role2,role3,role4] means /api/v2/host===post can be access by role2,role3,role4
+# eg: /api/v1/getSource3===get===[] means /api/v1/getSource3===get can not be access by any role
+resourceRole:
+  - /api/annotation/source1===get===[role2,role3]
+
+
+# 不用鉴权的URL
+excludedResource:
+  - /auth/**===*
+  - /api/v3/book===get
+  - /api/v1/account/auth===post
+  - /**/*.html===get
+  - /**/*.js===get
+  - /**/*.css===get
+  - /**/*.ico===get
+  - /**/*.png===*
